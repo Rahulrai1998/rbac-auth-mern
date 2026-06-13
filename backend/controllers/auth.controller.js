@@ -43,7 +43,7 @@ export const login = async (req, res) => {
 
     const isMatch = await bcrypt.compare(password, user.password);
 
-    if (!isMatch) res.status(400).json({ message: "Invalid Credentials." });
+    if (!isMatch) res.status(401).json({ message: "Invalid Credentials." });
     const { _id, username, email: userEmail, role } = user;
 
     const accessToken = jwt.sign(
@@ -89,11 +89,62 @@ export const login = async (req, res) => {
   }
 };
 
+//FUNCTION TO USE REFRESH TOKEN AND GENERATE NEW ACCESS TOKEN
+export const getNewAccessToken = async (req, res) => {
+  try {
+    //GET REFRESH TOKEN FROM THE CLIENT
+    const refreshToken = req.cookies.refreshToken;
+    if (!refreshToken)
+      res.status(401).json({ message: "No  refresh token provided." });
+    // 1.g
+    const decryptedPayload = jwt.verify(
+      refreshToken,
+      process.env.REFRESH_TOKEN_SECRET,
+    );
+    //makes sure if user still exists instead getting deleted or blocked.
+    const user = await User.findById(decryptedPayload.id);
+    if (!user) res.status(404).json({ message: "User not found." });
+
+    //GENERATE A FRESH ACCESS TOKEN
+    const newAccessToken = jwt.sign(
+      {
+        id: user._id,
+        role: user.role,
+      },
+      process.env.ACCESS_TOKEN_SECRET,
+      {
+        expiresIn: "15m",
+      },
+    );
+
+    const { _id, username, email, role } = user;
+
+    res.status(200).json({
+      accessToken: newAccessToken,
+      user: {
+        id: _id,
+        email,
+        username,
+        role,
+      },
+    });
+  } catch (error) {
+    console.log("Error: ", error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
+export const logout = (req, res) => {
+  
+};
+
 /*
 1.
-a. cookie-parser: a 3rd party middleware used to read incoming cookies from the client.
+a. cookie-parser (cookiepParser()): a 3rd party middleware used to read, decode incoming cookies from the client.
 b. res.cookie(name, value, options object): a built-in method in Express used to write outgoing cookies in the client. It simplifies setting the Set-Cookie response header by accepting the cookie name, value and an options object for security rules.
 c. httpOnly: true: it prevents js to access this token/cookie via browser. It secures from XSS attacks from stealing the refresh token.
 d. secure: true/false: ensures that the cookies are sent over only https instead http.
 e. sameSite: "strict": ensures cookies never sent to the cross-site/different-origin requests. It prevents CSRF attacks.
+f. 401 (Unauthorized): means the server rejected the request because it lacks valid authentication credentials due to missing, expired or incorrect API key, token or password.
+g. jwt.verify(token, token-secret-key): if verifies, it returns the payload object else throws error.
 */
