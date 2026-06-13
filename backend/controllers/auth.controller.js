@@ -53,7 +53,7 @@ export const login = async (req, res) => {
       },
       process.env.ACCESS_TOKEN_SECRET,
       {
-        expiresIn: "15m",
+        expiresIn: "15s",
       },
     );
     const refreshToken = jwt.sign(
@@ -68,6 +68,8 @@ export const login = async (req, res) => {
     );
 
     //1: we store refresh token into HttpOnly cookie which saves it from JS access in the client's browser.
+    //only refresh tokens will be attached to the client browser's cookie from server side.
+    //access tokens will send to the client and client will store access token into the browser's cookie from client side.
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true, //1.c
       secure: process.env.NODE_ENV === "production", //1.c
@@ -135,7 +137,21 @@ export const getNewAccessToken = async (req, res) => {
 };
 
 export const logout = (req, res) => {
-  
+  try {
+    // it will prevent the new access token to be re-generated after access token expiry.
+    //user can still login to the app until the access token is expired.
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    });
+    res.status(200).json({ message: "Logged out successfully." });
+  } catch (error) {
+    console.log("Error: ", error);
+    res.status(500).json({
+      message: "Server error.",
+    });
+  }
 };
 
 /*
