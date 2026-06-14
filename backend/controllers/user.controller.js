@@ -24,6 +24,9 @@ export const getUsers = async (req, res) => {
   }
 };
 
+export const deleteUser = async (req, res) => {
+  
+};
 /*
 req.query: key-value pair from query strings 
 req.params: dynamic params
