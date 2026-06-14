@@ -4,6 +4,7 @@ import { connectDB } from "./config/db.js";
 import cors from "cors";
 import authRoutes from "./routes/auth.route.js";
 import cookieParser from "cookie-parser";
+import { getUsers } from "./controllers/user.controller.js";
 
 dotenv.config(); //loads .env values into process.env
 
@@ -14,11 +15,10 @@ app.use(cors());
 app.use(json());
 app.use(cookieParser()); //1.a
 
-app.get("/", (req, res) => {
-  res.json({ message: "Message received" });
-});
+app.get("/users", getUsers);
 
 app.use("/api/auth", authRoutes);
+// app.use("user",)
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
