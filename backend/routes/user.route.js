@@ -1,8 +1,14 @@
 import { Router } from "express";
-import { getUsers } from "../controllers/user.controller.js";
+import {
+  deleteUser,
+  getUserProfile,
+  getUsers,
+} from "../controllers/user.controller.js";
 
 const router = Router();
 
-router.get("/users", getUsers);
+router.get("/", getUsers);
+router.get("/userProfile/:id", getUserProfile);
+router.delete("/deleteUser/:id", deleteUser);
 
 export default router;

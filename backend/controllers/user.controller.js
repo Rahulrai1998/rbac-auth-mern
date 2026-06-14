@@ -4,11 +4,12 @@ export const getUsers = async (req, res) => {
   try {
     const { page: pg, limit: lt } = req.query;
     const page = parseInt(pg) || 1;
-    const limit = parseInt(lt) || 2;
+    const limit = parseInt(lt) || 4;
     const skip = (page - 1) * limit;
     const totalUsersCount = await User.countDocuments();
     const totalPages = Math.ceil(totalUsersCount / limit);
     const requestedUsers = await User.find()
+      .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .select("-password");
@@ -25,8 +26,32 @@ export const getUsers = async (req, res) => {
 };
 
 export const deleteUser = async (req, res) => {
-  
+  try {
+    const { id } = req.params;
+    //RETURNS DELETED DOCUMENT
+    const deltedUser = await User.findByIdAndDelete(id);
+    if (!deltedUser) res.status(404).json({ message: "Item not found" });
+    res
+      .status(400)
+      .json({ message: "Item deleted successfully", item: deltedUser });
+  } catch (error) {
+    console.log("Error: ", error);
+    res.status(500).json({ message: "Server error" });
+  }
 };
+
+export const getUserProfile = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = await User.findById(id).select("-password");
+    if (!user) res.status(404).json({ message: "User not found" });
+    res.status(400).json(user);
+  } catch (error) {
+    console.log("Error: ", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 /*
 req.query: key-value pair from query strings 
 req.params: dynamic params
