@@ -15,7 +15,7 @@ app.use(cors());
 app.use(json());
 app.use(cookieParser()); //1.a
 
-app.use("/users", userRoutes);
+app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
 
 app.listen(PORT, () => {
