@@ -40,8 +40,10 @@ export const deleteUser = async (req, res) => {
   }
 };
 
+//this user profile route will only be accessed by authorized users.
 export const getUserProfile = async (req, res) => {
   try {
+    //we are here extracting id of user from the access token, which after checking for authorization via authMiddleware.
     const user = await User.findById(req.user.id).select("-password");
     if (!user) res.status(404).json({ message: "User not found" });
     res.status(200).json(user);
