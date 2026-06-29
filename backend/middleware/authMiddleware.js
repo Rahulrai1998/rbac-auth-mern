@@ -16,6 +16,7 @@ export const verifyToken = (req, res, next) => {
 //It is a wrapper function to check/verify roles.
 //uses closures to verify for different roles, by returning a middleware function.
 //Note
+//this could be used when an user trying to access a protected route.
 export const verifyUserRole = (role) => {
   return function (req, res, next) {
     const userRole = req.user?.role;

@@ -11,8 +11,13 @@ dotenv.config(); //loads .env values into process.env
 const PORT = process.env.PORT || 5000;
 
 const app = express();
-app.use(cors());
-app.use(json());
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true, //it instructs the browser to inlclude user-specific details like cookies, authentication tokens, TLS/SSL certificates etc.
+  }),
+);
+app.use(json()); //built-in middleware
 app.use(cookieParser()); //1.a
 
 app.use("/api/users", userRoutes);

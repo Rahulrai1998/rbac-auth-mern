@@ -70,6 +70,7 @@ export const login = async (req, res) => {
     //1: we store refresh token into HttpOnly cookie which saves it from JS access in the client's browser.
     //only refresh tokens will be attached to the client browser's cookie from server side.
     //access tokens will send to the client and client will store access token into the browser's cookie from client side.
+    //Note: HTTPonly cookie and Normal storage cookie are different.
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true, //1.c
       secure: process.env.NODE_ENV === "production", //1.c
